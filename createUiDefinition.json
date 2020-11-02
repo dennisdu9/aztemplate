@@ -1,0 +1,92 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {}
+        ],
+        "steps": [
+            {
+                "name": "storageConfig",
+                "label": "Storage settings",
+                "elements": [
+                    {
+                        "name": "storageAccounts",
+                        "type": "Microsoft.Storage.MultiStorageAccountCombo",
+                        "label": {
+                            "prefix": "Storage account name prefix",
+                            "type": "Storage account type"
+                        },
+                        "defaultValue": {
+                            "prefix": "stracct",
+                            "type": "Standard_LRS"
+                        },
+						"toolTip": "Storage Account Type - Default Standard_LRS",
+                        "constraints": {
+                            "allowedTypes": [
+                                "Premium_LRS",
+                                "Standard_LRS",
+                                "Standard_GRS"
+                            ]
+                        },
+                        "count": 2
+                    }
+                ]
+            },
+					{
+                "name": "NetworkConfig",
+                "label": "Network settings",
+                "subLabel": {
+                    "preValidation": "Configure the Network settings",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Network settings",
+                "elements": [
+                    
+                    
+                    {
+                      "name": "dnsAndPublicIP",
+                      "type": "Microsoft.Network.PublicIpAddressCombo",
+                      "label": {
+                        "publicIpAddress": "Public IP address",
+                        "domainNameLabel": "DNS Prefix"
+                      },
+                      "toolTip": {
+                        "domainNameLabel": "DNS Prefix for the VM public IP addresses."
+                      },
+                      "defaultValue": {
+                        "publicIpAddressName": "publicIP"
+                      },
+                      "options": {
+                        "hideNone": true
+                      }
+                    }
+                ]
+     		},
+            {
+                "name": "tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+						"toolTip": "Not Used",
+                        "resources": [
+                            "Microsoft.Storage/storageAccounts",
+                            "Microsoft.Compute/virtualMachines"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "storageAccountNamePrefix": "[steps('storageConfig').storageAccounts.prefix]",
+            "storageAccountType": "[steps('storageConfig').storageAccounts.type]",
+            "location": "[location()]",
+			 "publicIPAddressName": "[steps('infrastructureConfig').DnsAndPublicIP.name]",
+            "dnsNameForPublicIP": "[steps('infrastructureConfig').dnsAndPublicIP.domainNameLabel]",
+            "tagsByResource": "[steps('tags').tagsByResource]"
+        }
+    }
+}
