@@ -103,7 +103,7 @@
 
 
 			"publicIPAddressName": "[steps('VMSettings').publicIpAddress.name]",
-            "dnsLabelPrefix": "[steps('VMSettings').publicIpAddress.domainNameLabe]"
+            "dnsLabelPrefix": "[steps('VMSettings').publicIpAddress.domainNameLabel]"
         }
     }
 }
