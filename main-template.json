@@ -27,17 +27,17 @@
       "type": "string",
       "defaultValue": "password",
       "allowedValues": [
-        "password"
+        "password",
+        "sshPublicKey"
       ],
       "metadata": {
-        "description": "Not Used"
+        "description": "Type of authentication to use on the Virtual Machine."
       }
     },
     "adminPasswordOrKey": {
       "type": "securestring",
-      "defaultValue": "Harman13344",
       "metadata": {
-        "description": "Not Used"
+        "description": "Password or ssh key for the Virtual Machine."
       }
     },
     "osType": {

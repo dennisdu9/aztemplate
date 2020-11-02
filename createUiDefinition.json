@@ -4,89 +4,106 @@
     "version": "0.1.2-preview",
     "parameters": {
         "basics": [
-            {}
+            {
+                "name": "vmName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Virtual Machine name",
+                "toolTip": "The name of the Virtual Machine.",
+                "defaultValue": "linux-vm",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z-]{3,79}$",
+                    "validationMessage": "The VM Name must be between 3 and 79 characters long and contain letters, numbers and hyphens only."
+                }
+            },
+            {
+                "name": "adminUsername",
+                "type": "Microsoft.Compute.UserNameTextBox",
+                "label": "Username",
+                "toolTip": "Admin username for the machine",
+                "osPlatform": "Linux",
+                "constraints": {
+                    "required": true
+                }
+            },
+            {
+                "name": "SSHCredentials",
+                "type": "Microsoft.Compute.CredentialsCombo",
+                "label": {
+                    "authenticationType": "Authentication type",
+                    "password": "Password",
+                    "confirmPassword": "Confirm password",
+                    "sshPublicKey": "SSH public key"
+                },
+                "toolTip": {
+                    "authenticationType": "Authentication Type for the Virtual Machine",
+                    "password": "Password for the Virtual Machine",
+                    "sshPublicKey": "SSH Public Key for the Virtual Machine"
+                },
+                "constraints": {
+                    "required": true
+                },
+                "options": {
+                    "hideConfirmation": false
+                },
+                "osPlatform": "Linux"
+            }
+
         ],
         "steps": [
             {
-                "name": "storageConfig",
-                "label": "Storage settings",
+                "name": "VMSettings",
+                "label": "Virtual Machine settings",
                 "elements": [
                     {
-                        "name": "storageAccounts",
-                        "type": "Microsoft.Storage.MultiStorageAccountCombo",
+                        "name": "vmSize",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "label": "Virtual machine size",
+                        "toolTip": "The size of virtual machine to provision.",
+                        "recommendedSizes": [
+                            "Standard_D8_v3"
+                        ],
+                        "osPlatform": "Linux",
+                        "count": "1"
+                    },
+                    {
+                        "name": "publicIpAddress",
+                        "type": "Microsoft.Network.PublicIpAddressCombo",
                         "label": {
-                            "prefix": "Storage account name prefix",
-                            "type": "Storage account type"
+                            "publicIpAddress": "Public IP Address for the VM",
+                            "domainNameLabel": "DNS Prefix for the public IP Address"
+                        },
+                        "toolTip": {
+                            "publicIpAddress": "Public IP Address for the VM",
+                            "domainNameLabel": "DNS Prefix for the public IP Address, must be globally unique"
                         },
                         "defaultValue": {
-                            "prefix": "stracct",
-                            "type": "Standard_LRS"
+                            "publicIpAddressName": "[concat(basics('vmName'), '-ip')]",
+                            "domainNameLabel": "[concat(basics('vmName'), '-', take(replace(guid(), '-', ''), 10))]"
                         },
-						"toolTip": "Storage Account Type - Default Standard_LRS",
+                        "options": {
+                            "hideExisting": false,
+                            "hideNone": false
+                        },
                         "constraints": {
-                            "allowedTypes": [
-                                "Premium_LRS",
-                                "Standard_LRS",
-                                "Standard_GRS"
-                            ]
-                        },
-                        "count": 2
-                    }
-                ]
-            },
-					{
-                "name": "NetworkConfig",
-                "label": "Network settings",
-                "subLabel": {
-                    "preValidation": "Configure the Network settings",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Network settings",
-                "elements": [
-                    
-                    
-                    {
-                      "name": "dnsAndPublicIP",
-                      "type": "Microsoft.Network.PublicIpAddressCombo",
-                      "label": {
-                        "publicIpAddress": "Public IP address",
-                        "domainNameLabel": "DNS Prefix"
-                      },
-                      "toolTip": {
-                        "domainNameLabel": "DNS Prefix for the VM public IP addresses."
-                      },
-                      "defaultValue": {
-                        "publicIpAddressName": "publicIP"
-                      },
-                      "options": {
-                        "hideNone": true
-                      }
-                    }
-                ]
-     		},
-            {
-                "name": "tags",
-                "label": "Tags",
-                "elements": [
-                    {
-                        "name": "tagsByResource",
-                        "type": "Microsoft.Common.TagsByResource",
-						"toolTip": "Not Used",
-                        "resources": [
-                            "Microsoft.Storage/storageAccounts",
-                            "Microsoft.Compute/virtualMachines"
-                        ]
+                            "required": {
+                                "domainNameLabel": true
+                            }
+                        }
                     }
                 ]
             }
         ],
         "outputs": {
-            "storageAccountNamePrefix": "[steps('storageConfig').storageAccounts.prefix]",
-            "storageAccountType": "[steps('storageConfig').storageAccounts.type]",
             "location": "[location()]",
-			 "publicIPAddressName": "[steps('infrastructureConfig').DnsAndPublicIP.name]",
-            "dnsNameForPublicIP": "[steps('infrastructureConfig').dnsAndPublicIP.domainNameLabel]",
-            "tagsByResource": "[steps('tags').tagsByResource]"
+            "vmName": "[basics('vmName')]",
+            "adminUsername": "[basics('adminUsername')]",
+            "authenticationType": "[basics('SSHCredentials').authenticationType]",
+            "adminPasswordOrKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
+
+
+			"publicIPAddressName": "[steps('VMSettings').publicIpAddress.name]",
+            "dnsLabelPrefix": "[steps('VMSettings').publicIpAddress.domainNameLabe]",
         }
     }
 }
