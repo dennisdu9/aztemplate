@@ -35,6 +35,7 @@
     },
     "adminPasswordOrKey": {
       "type": "securestring",
+      "defaultValue": "Harman13344",
       "metadata": {
         "description": "Not Used"
       }
