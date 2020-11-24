@@ -101,6 +101,7 @@
             "authenticationType": "[basics('SSHCredentials').authenticationType]",
             "adminPasswordOrKey": "[coalesce(basics('SSHCredentials').password, basics('SSHCredentials').sshPublicKey)]",
 
+            "vmSize":"[steps('VMSettings').vmSize]",
 
 			"publicIPAddressName": "[steps('VMSettings').publicIpAddress.name]",
             "dnsLabelPrefix": "[steps('VMSettings').publicIpAddress.domainNameLabel]"
