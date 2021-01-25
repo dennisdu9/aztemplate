@@ -40,23 +40,6 @@
         "description": "Password or ssh key for the Virtual Machine."
       }
     },
-    "osType": {
-      "type": "string",
-	  "defaultValue": "Linux",
-      "allowedValues": [
-        "Linux"
-      ],
-      "metadata": {
-        "description": "This is the OS that your VM will be running"
-      }
-    },
-    "osDiskVhdUri": {
-      "type": "string",
-	  "defaultValue": "https://msimages.blob.core.windows.net/images/licensed-trial.vhd",
-      "metadata": {
-        "description": "Uri of the your user image"
-      }
-    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_D8_v3",
@@ -66,21 +49,36 @@
     },
     "vmName": {
       "type": "string",
-      "defaultValue": "vmFromImage",
+      "defaultValue": "MS_VM",
       "metadata": {
         "description": "Name of the VM"
       }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+      },
+      "defaultValue": "[deployment().properties.templateLink.uri]" 
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
     "storageAccountName": "[concat('diags', uniquestring(resourceGroup().id))]",
-    "imageName": "[concat(parameters('osType'), '-image')]",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
     "publicIPAddressName": "myPublicIP",
     "virtualNetworkName": "MyVNET",
+    "scriptFileName": "ms_docker_deploy",
+    "scriptArgs":"linux MediaSuite-3.4.0-637-2019-08-15-16-59.iso",
     "networkSecurityGroupName": "nsgAllowRemoting",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "linuxConfiguration": {
@@ -119,23 +117,6 @@
       },
       "kind": "Storage",
       "properties": {}
-    },
-    {
-      "type": "Microsoft.Compute/images",
-      "apiVersion": "2019-12-01",
-      "name": "[variables('imageName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "storageProfile": {
-          "osDisk": {
-            "osType": "[parameters('osType')]",
-            "osState": "Generalized",
-            "blobUri": "[parameters('osDiskVhdUri')]",
-            "storageAccountType": "Standard_LRS"
-          }
-        },
-        "hyperVGeneration": "V1"
-      }
     },
     {
       "apiVersion": "2020-03-01",
@@ -228,14 +209,13 @@
       }
     },
     {
-      "apiVersion": "2019-12-01",
+      "apiVersion": "2019-07-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "[variables('storageAccountName')]",
-        "[variables('nicName')]",
-        "[variables('imageName')]"
+        "[variables('nicName')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -249,7 +229,10 @@
         },
         "storageProfile": {
           "imageReference": {
-            "id": "[resourceId('Microsoft.Compute/images', variables('imageName'))]"
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7_7",
+            "version": "latest"
           }
         },
         "networkProfile": {
@@ -264,7 +247,32 @@
             "enabled": true,
             "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
           }
-        }
+        },
+        "resources": [
+          {
+            "type": "extensions",
+            "name": "configScript",
+            "apiVersion": "2020-06-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+              "[parameters('vmName')]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Azure.Extensions",
+              "type": "CustomScript",
+              "typeHandlerVersion": "2.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/ms_docker_deploy', parameters('_artifactsLocationSasToken')))]"
+                ]
+              },
+              "protectedSettings": {
+                "commandToExecute": "[concat('bash ', variables('scriptFileName'), ' ', variables('scriptArgs'))]"
+              }
+            }
+          }
+        ]
       }
     }
   ],
