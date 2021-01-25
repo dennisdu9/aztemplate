@@ -11,7 +11,7 @@
     },
     "adminUsername": {
       "type": "string",
-	  "defaultValue": "harmanadmin",	
+      "defaultValue": "harmanadmin",
       "metadata": {
         "description": "Username for the Virtual Machine."
       }
@@ -59,7 +59,7 @@
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
       },
-      "defaultValue": "[deployment().properties.templateLink.uri]" 
+      "defaultValue": "[deployment().properties.templateLink.uri]"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -78,7 +78,7 @@
     "publicIPAddressName": "myPublicIP",
     "virtualNetworkName": "MyVNET",
     "scriptFileName": "ms_docker_deploy",
-    "scriptArgs":"linux MediaSuite-3.4.0-637-2019-08-15-16-59.iso",
+    "scriptArgs": "linux MediaSuite-3.4.0-637-2019-08-15-16-59.iso",
     "networkSecurityGroupName": "nsgAllowRemoting",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "linuxConfiguration": {
@@ -94,19 +94,19 @@
     }
   },
   "resources": [
-  { 
-    "apiVersion": "2020-06-01",
-    "name": "pid-db366b9a-fec2-48a7-87a0-fae567bf9d41", 
-    "type": "Microsoft.Resources/deployments",
-    "properties": {
+    {
+      "apiVersion": "2020-06-01",
+      "name": "pid-db366b9a-fec2-48a7-87a0-fae567bf9d41",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
         "mode": "Incremental",
         "template": {
-            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-            "contentVersion": "1.0.0.0",
-            "resources": []
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
         }
-    }
-	},
+      }
+    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
@@ -247,8 +247,9 @@
             "enabled": true,
             "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
           }
-        },
-        "resources": [
+        }
+      },
+      "resources": [
           {
             "type": "extensions",
             "name": "configScript",
@@ -273,7 +274,6 @@
             }
           }
         ]
-      }
     }
   ],
   "outputs": {
