@@ -5,5 +5,9 @@ wget http://23.97.70.77/ms_docker_deploy
 wget http://23.97.70.77/MediaSuite-3.8.0.0-1435-2021-01-26-09-32.iso
 sudo su
 chmod +x ms_docker_deploy ms_docker_install_daemon
-./ms_docker_install_daemon --confighost
-./ms_docker_deploy linux MediaSuite-3.8.0.0-1435-2021-01-26-09-32.iso
+mkdir -p /var/dockerinstall/bin
+mv ms_docker_deploy /var/dockerinstall/bin
+mv ms_docker_install_daemon /var/dockerinstall/bin
+mv MediaSuite-3.8.0.0-1435-2021-01-26-09-32.iso /var/dockerinstall
+/var/dockerinstall/bin/ms_docker_install_daemon --confighost
+reboot
